@@ -1,70 +1,51 @@
-# Progetto comunicazioni multimediali
-Il progetto denominato *The Finder* punta a creare un motore di ricerca in grado di estrarre le immagini più simili rispetto ad una inserita dall'utente.
+# Near-duplicate images :mag_right:
+Fetching similar images in (near) real time is an important use case of information
+retrieval systems.
+The reasons why this kind of system is needed are many:
+- Copyright issues. After images are posted on the internet, someone might modify
+them and repost them claiming that those images are his.
+- Performance. The presence of near-duplicates affects the performance of the
+search engines critically.
+- Criminal investigation.
+- Medical diagnosis.
+- Storage optimization.
+- Privacy.
 
-## Architettura
-L'architettura scelta, per la nostra applicazione, è di tipo *client-server*. Abbiamo effettuato questa scelta perchè così facendo, sarà possibile accedervi in facilità e con qualsiasi dispositivo 
-avente un browser. Inoltre, non sarà richiesto all'utente di scaricare nessun file all'interno del dispositivo.
+The problem of finding near-duplicate images is very well known, therefore there are
+already plenty of algorithms for this purpose.
+All the algorithms we studied for the implementation of our system were somehow
+incomplete: some of them required too much computational power, some others were
+simply not accurate enough to be used alone, and others had some problems in particular
+cases (see ORB with blurred images).
+Our idea is to combine different methods in order to fill the weakness of one algorithm
+with the accuracy of another. We choose to use three algorithms:
+1. Histograms comparisons
+2. Features comparisons
+3. ORB
 
-La nostra web app è composta da 4 pagine: index.html, results.html, gallery.html e upload.html
+The proposed result will be the weighted sum of the three methods. The three weights are
+part of the algorithm, but they could be changed if necessary.
+Finally, whether two images are near-duplicates or not is decided using a threshold.
+Therefore, the algorithm is regulated by 4 parameters, whose values are already proposed
+by our implementation considering the best performance in our dataset.
+Then we implemented two different search algorithms based on what situation we are in.
+The first one consists in searching in a large dataset all the images that are
+near-duplicates of another external image (useful for detection), the second one selects
+all the groups of near-duplicate images within a folder (useful for storage optimization).
 
-
-Per i dettagli si rimanda al report completo: [Report finale](https://github.com/alessioBelli/TheFinder-TVTeam/blob/main/documentation/Report%20The%20Finder%20-%20TVTeam.pdf)
-
-## Istruzioni
-Per testare l'applicazione (creando un server localmente nella propria macchina) è necessario avere installato python sul proprio terminale. 
-Inoltre è necessario installare
-le seguenti librerie che non sono comprese nella libreria standard di Python.
+## How to run it :wrench:
+In order to run the application, you need to install Python on your PC with several libraries, including:
 - tensorflow
 - flask
 - openCV
 - numpy
 - pillow
+- scikit_learn
 
-NB: Per poter installare la libreria TensorFlow, è stato riscontrato su Windows che potrebbe essere necessario aver abilitato l'opzione "Removing the MAX_PATH Limitation" contestualmente all'installazione di Python. Per maggiori dettagli: https://docs.python.org/3/using/windows.html#removing-the-max-path-limitation
+After downloading the zip file from Github and unzipping it, to install the libraries you just need to execute on your terminal the 
+`pip install -r requirements.txt` command in the path of the unzipped folder.
 
-Dopo aver scaricato lo zip da GitHub e averlo decompresso, per installare le librerie è sufficiente eseguire sul proprio terminale il comando `pip install -r requirements.txt` dopo essersi posizionati al percorso della cartella decompressa.
+Finally, if you want to run the application, you have to execute the command `python3 theFinder.py`. Once you have run the application, to view the web-app you have to type in a search engine `localhost:4555`.
 
-Infine, per eseguire l'applicativo da terminale, bisogna digitare il comando `python3 theFinder.py`. 
-Una volta fatta partire l'applicazione, è possibile accedervi semplicemente usando un browser, mediante l'indirizzo `localhost:4555`.
-
-Nota: Al primo avvio assoluto dell'applicazione, verrà scaricato e salvato localmente in maniera automatica un pacchetto di circa 90 MB contenente i parametri pre-addestrati dell'algoritmo ResNet50.
-Per quanto riguarda le feature del dataset di immagini, esse sono già presenti nello zip. Se si volesse ricalcolarle, basta eliminare la cartella "features" oppure aggiungere/rimuovere immagini alla cartella "gallery". Al primo avvio dell'applicazione dopo un'aggiunta o una modifica di features saranno necessari alcuni minuti per il ricalcolo e il salvataggio.
-
-
-### Come creare un ambiente virtuale
-Qualora non si volessero installare le librerie direttamente sul proprio terminale c'è la possibilità di creare un ambiente 
-virtuale, ossia uno spazio indipendente dal resto del sistema in cui è possibile testare e lavorare con Python e pip.
-
-E' sufficiente eseguire i seguenti comandi all'interno del terminale:
-```
-$ cd TheFinder
-$ python3 -m venv venv
-```
-
-Windows:
-`$ py -3 -m venv venv`
-
-Una volta creato l'ambiente virtuale, basterà attiavarlo mediante il comando:
-```
-$ . venv/bin/activate
-```
-
-Windows: `> venv\Scripts\activate`
-
-Dopo aver attivato l'ambiente virtuale, digitando il comando `pip install -r requirements.txt` vengono installate le librerie necessarie.
-
-### Accedere al server da un altro dispositivo nella stessa rete
-Se si volesse avviare il server in una macchina e accedere all'applicazione da un dispositivo qualsiasi **collegato alla stessa rete**, è necessaria una modifica al codice:
-all'ultima riga del file theFinder.py, 
-modificare
-```
-app.run(port=4555, debug=True, use_reloader=False)
-```
-con 
-
-```
-app.run(host="0.0.0.0", port=4555, debug=True, use_reloader=False)
-```
-
-Successivamente, dopo aver lanciato l'applicativo nella macchina server, prendere nota dell'indirizzo IP di quest'ultima.
-Per collegarsi da un altro dispositivo, sarà sufficiente usare un browser, mediante l'indirizzo `indirizzoip_server:4555`. 
+## Possible problems :name_badge:
+If run on MacOS, the following error could be encountered `certificate verify failed: unable to get local issuer certificate`. In this case, just type on the terminal `open /Applications/Python\ <Python Version>/Install\ Certificates.command`
